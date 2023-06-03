@@ -1,20 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import Stripe from 'stripe';
+import CustomerService from '../customer/customer.service';
 
 @Injectable()
 export default class PaymentService {
   private stripe: Stripe;
 
-  constructor() {
+  constructor(private customerService: CustomerService) {
     this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
       apiVersion: '2022-11-15',
     });
   }
 
   public async getCheckoutSessionUrl(userId: string) {
+    const customer = await this.customerService.getById(userId);
     return await this.stripe.checkout.sessions.create({
       mode: 'subscription',
-      customer: userId,
+      customer: customer ? customer.customerId : undefined,
       client_reference_id: userId,
       success_url: `${process.env.FRONT_URL}/subscription/success`,
       allow_promotion_codes: true,

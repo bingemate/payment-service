@@ -1,11 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
+import CustomerService from '../customer/customer.service';
 
 @Injectable()
 export default class SubscriptionService {
-  constructor(private readonly httpService: HttpService) {}
+  constructor(
+    private readonly httpService: HttpService,
+    private customerService: CustomerService,
+  ) {}
 
-  async userSubscribed(userId: string) {
+  async userSubscribed(userId: string, customerId: string) {
+    await this.customerService.createCustomer(userId, customerId);
     this.httpService.put(
       `${process.env.KEYCLOAK_SERVICE_URL}/user-admin/roles/${userId}`,
       {

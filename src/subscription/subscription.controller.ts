@@ -36,6 +36,7 @@ export class SubscriptionController {
       );
       this.subscriptionService.userSubscribed(
         event.data.object['client_reference_id'],
+        event.data.object['customer'],
       );
     } catch (err) {
       throw new BadRequestException(`Webhook Error: ${err.message}`);
