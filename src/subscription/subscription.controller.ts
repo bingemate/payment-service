@@ -5,6 +5,7 @@ import {
   Delete,
   Headers,
   HttpCode,
+  Logger,
   Post,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
@@ -30,7 +31,7 @@ export class SubscriptionController {
         sig,
         process.env.STRIPE_CANCELED_SUB_KEY,
       );
-      console.log(event);
+      Logger.log(event);
       this.subscriptionService.userSubscribed(
         event.data.object['client_reference_id'],
         event.data.object['subscription_id'],
@@ -51,7 +52,7 @@ export class SubscriptionController {
         sig,
         process.env.STRIPE_CANCELED_SUB_KEY,
       );
-      console.log(event);
+      Logger.log(event);
       this.subscriptionService.userUnsubscribed(
         event.data.object['client_reference_id'],
         event.data.object['subscription_id'],
