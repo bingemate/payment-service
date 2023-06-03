@@ -29,7 +29,7 @@ export class SubscriptionController {
       const event = this.paymentService.constructEvent(
         body,
         sig,
-        process.env.STRIPE_CANCELED_SUB_KEY,
+        process.env.STRIPE_CREATED_SUB_KEY,
       );
       Logger.log(event);
       this.subscriptionService.userSubscribed(
