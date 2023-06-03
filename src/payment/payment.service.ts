@@ -21,14 +21,7 @@ export default class PaymentService {
       line_items: [
         {
           quantity: 1,
-          price_data: {
-            unit_amount: 999,
-            recurring: {
-              interval: 'month',
-            },
-            currency: 'EUR',
-            product: 'prod_O0v1eTKazBiKZX',
-          },
+          price: 'price_1NEtBTBs8hPuOGwOynwwc2iQ',
         },
       ],
     });
