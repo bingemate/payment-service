@@ -20,6 +20,7 @@ export default class PaymentService {
       currency: 'EUR',
       line_items: [
         {
+          quantity: 1,
           price_data: {
             currency: 'EUR',
             product: 'prod_O0v1eTKazBiKZX',
