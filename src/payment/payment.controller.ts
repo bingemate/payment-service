@@ -25,6 +25,6 @@ export class PaymentController {
   ) {
     const userId = headers['user-id'] as string;
     const checkout = await this.paymentService.getCheckoutSessionId(userId);
-    return checkout.id;
+    return checkout.url;
   }
 }
