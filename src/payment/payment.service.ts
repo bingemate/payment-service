@@ -22,6 +22,9 @@ export default class PaymentService {
         {
           quantity: 1,
           price_data: {
+            recurring: {
+              interval: 'month',
+            },
             currency: 'EUR',
             product: 'prod_O0v1eTKazBiKZX',
           },
