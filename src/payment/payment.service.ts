@@ -14,6 +14,7 @@ export default class PaymentService {
   public async getCheckoutSessionUrl(userId: string) {
     return await this.stripe.checkout.sessions.create({
       mode: 'subscription',
+      customer: userId,
       client_reference_id: userId,
       success_url: `${process.env.FRONT_URL}/subscription/success`,
       allow_promotion_codes: true,
