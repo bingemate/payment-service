@@ -22,7 +22,7 @@ export class SubscriptionController {
   @ApiOkResponse()
   @HttpCode(200)
   @Post('/created')
-  async createdSubscription(@Headers() headers, @Body() body) {
+  async createdSubscription(@Headers() headers, @Body() body: string) {
     try {
       const sig = headers['stripe-signature'];
       const event = this.paymentService.constructEvent(
@@ -43,7 +43,7 @@ export class SubscriptionController {
   @ApiOkResponse()
   @HttpCode(200)
   @Post('/canceled')
-  async canceledSubscription(@Headers() headers, @Body() body) {
+  async canceledSubscription(@Headers() headers, @Body() body: string) {
     try {
       const sig = headers['stripe-signature'];
       const event = this.paymentService.constructEvent(
