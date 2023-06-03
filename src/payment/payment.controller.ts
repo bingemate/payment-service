@@ -16,6 +16,6 @@ export class PaymentController {
   async getCheckoutSession(@Headers() headers) {
     const userId = headers['user-id'] as string;
     const checkout = await this.paymentService.getCheckoutSessionUrl(userId);
-    return checkout.url;
+    return { url: checkout.url };
   }
 }
