@@ -24,10 +24,6 @@ export default class PaymentService {
           adjustable_quantity: {
             enabled: false,
           },
-          price_data: {
-            currency: 'EUR',
-            recurring: { interval: 'month' },
-          },
         },
       ],
     });
