@@ -5,6 +5,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { PaymentModule } from './payment/payment.module';
 import { ServiceStatusModule } from './service-status/service-status.module';
+import { CustomerModule } from './customer/customer.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { ServiceStatusModule } from './service-status/service-status.module';
       autoLoadEntities: true,
       logging: false,
     }),
+    CustomerModule,
     PaymentModule,
     ServiceStatusModule,
     SubscriptionModule,
