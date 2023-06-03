@@ -2,7 +2,6 @@ import {
   BadRequestException,
   Body,
   Controller,
-  Delete,
   Headers,
   HttpCode,
   Logger,
@@ -22,7 +21,7 @@ export class SubscriptionController {
 
   @ApiOkResponse()
   @HttpCode(200)
-  @Delete('/created')
+  @Post('/created')
   async createdSubscription(@Headers() headers, @Body() body) {
     try {
       const sig = headers['stripe-signature'];
