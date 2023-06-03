@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { PaymentModule } from './payment/payment.module';
+import { ServiceStatusModule } from './service-status/service-status.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { PaymentModule } from './payment/payment.module';
       autoLoadEntities: true,
       logging: false,
     }),
+    ServiceStatusModule,
     SubscriptionModule,
     PaymentModule,
   ],
