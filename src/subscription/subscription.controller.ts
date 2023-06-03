@@ -4,7 +4,6 @@ import {
   Controller,
   Headers,
   HttpCode,
-  Logger,
   Post,
   RawBodyRequest,
   Req,
@@ -35,10 +34,8 @@ export class SubscriptionController {
         sig,
         process.env.STRIPE_CREATED_SUB_KEY,
       );
-      Logger.log(event);
       this.subscriptionService.userSubscribed(
         event.data.object['client_reference_id'],
-        event.data.object['subscription_id'],
       );
     } catch (err) {
       throw new BadRequestException(`Webhook Error: ${err.message}`);
@@ -56,10 +53,8 @@ export class SubscriptionController {
         sig,
         process.env.STRIPE_CANCELED_SUB_KEY,
       );
-      Logger.log(event);
       this.subscriptionService.userUnsubscribed(
         event.data.object['client_reference_id'],
-        event.data.object['subscription_id'],
       );
     } catch (err) {
       throw new BadRequestException(`Webhook Error: ${err.message}`);
