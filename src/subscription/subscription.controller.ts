@@ -6,6 +6,8 @@ import {
   HttpCode,
   Logger,
   Post,
+  RawBodyRequest,
+  Req,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import PaymentService from '../payment/payment.service';
@@ -22,11 +24,14 @@ export class SubscriptionController {
   @ApiOkResponse()
   @HttpCode(200)
   @Post('/created')
-  async createdSubscription(@Headers() headers, @Body() body: string) {
+  async createdSubscription(
+    @Headers() headers,
+    @Req() request: RawBodyRequest<Request>,
+  ) {
     try {
       const sig = headers['stripe-signature'];
       const event = this.paymentService.constructEvent(
-        body,
+        request.rawBody,
         sig,
         process.env.STRIPE_CREATED_SUB_KEY,
       );

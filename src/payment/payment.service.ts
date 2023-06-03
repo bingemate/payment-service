@@ -26,7 +26,7 @@ export default class PaymentService {
       ],
     });
   }
-  public constructEvent(body: string, sig: string, key: string) {
-    return this.stripe?.webhooks.constructEvent(Buffer.from(body), sig, key);
+  public constructEvent(body, sig: string, key: string) {
+    return this.stripe?.webhooks.constructEvent(body, sig, key);
   }
 }
