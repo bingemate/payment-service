@@ -15,6 +15,6 @@ export default class CustomerService {
   }
 
   async createCustomer(userId: string, customerId: string) {
-    return await this.customerRepository.create({ userId, customerId });
+    return await this.customerRepository.save({ userId, customerId });
   }
 }
