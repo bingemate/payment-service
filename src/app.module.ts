@@ -21,9 +21,9 @@ import { ServiceStatusModule } from './service-status/service-status.module';
       autoLoadEntities: true,
       logging: false,
     }),
+    PaymentModule,
     ServiceStatusModule,
     SubscriptionModule,
-    PaymentModule,
   ],
   providers: [],
 })
