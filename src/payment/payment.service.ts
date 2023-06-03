@@ -18,6 +18,18 @@ export default class PaymentService {
       success_url: `${process.env.FRONT_URL}/subscription/success`,
       allow_promotion_codes: true,
       currency: 'EUR',
+      line_items: [
+        {
+          price: 'prod_O0v1eTKazBiKZX',
+          adjustable_quantity: {
+            enabled: false,
+          },
+          price_data: {
+            currency: 'EUR',
+            recurring: { interval: 'month' },
+          },
+        },
+      ],
     });
   }
   public constructEvent(body: string, sig: string, key: string) {
