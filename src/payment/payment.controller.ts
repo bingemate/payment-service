@@ -1,10 +1,5 @@
-import { Controller, Delete, Headers, HttpCode, Param } from '@nestjs/common';
-import {
-  ApiNoContentResponse,
-  ApiOperation,
-  ApiParam,
-  ApiTags,
-} from '@nestjs/swagger';
+import { Controller, Get, Headers, HttpCode } from '@nestjs/common';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import PaymentService from './payment.service';
 
 @ApiTags('/payment')
@@ -13,18 +8,14 @@ export class PaymentController {
   constructor(private paymentService: PaymentService) {}
 
   @ApiOperation({
-    description: 'Delete history entry',
+    description: 'Get checkout session',
   })
-  @ApiNoContentResponse()
-  @ApiParam({ name: 'mediaId' })
-  @HttpCode(204)
-  @Delete('/:mediaId')
-  async deleteMediaHistoryById(
-    @Param('mediaId') mediaId: number,
-    @Headers() headers,
-  ) {
+  @ApiOkResponse()
+  @HttpCode(200)
+  @Get('checkout')
+  async getCheckoutSession(@Headers() headers) {
     const userId = headers['user-id'] as string;
-    const checkout = await this.paymentService.getCheckoutSessionId(userId);
+    const checkout = await this.paymentService.getCheckoutSessionUrl(userId);
     return checkout.url;
   }
 }

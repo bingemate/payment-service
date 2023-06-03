@@ -11,7 +11,7 @@ export default class PaymentService {
     });
   }
 
-  public async getCheckoutSessionId(userId: string) {
+  public async getCheckoutSessionUrl(userId: string) {
     return await this.stripe.checkout.sessions.create({
       mode: 'subscription',
       client_reference_id: userId,
