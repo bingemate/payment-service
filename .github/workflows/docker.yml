@@ -31,4 +31,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: rg.fr-par.scw.cloud/binge-mate/watch-service:${{ github.ref == 'refs/heads/dev' && 'dev' || 'prod' }}
+          tags: rg.fr-par.scw.cloud/binge-mate/payment-service:${{ github.ref == 'refs/heads/dev' && 'dev' || 'prod' }}
