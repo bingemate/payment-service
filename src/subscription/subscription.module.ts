@@ -4,11 +4,15 @@ import { SubscriptionController } from './subscription.controller';
 import { HttpModule } from '@nestjs/axios';
 import { SubscriptionEntity } from './subscription.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import PaymentService from '../payment/payment.service';
+import { PaymentModule } from '../payment/payment.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([SubscriptionEntity]), HttpModule],
-  providers: [SubscriptionService, PaymentService],
+  imports: [
+    TypeOrmModule.forFeature([SubscriptionEntity]),
+    HttpModule,
+    PaymentModule,
+  ],
+  providers: [SubscriptionService],
   exports: [SubscriptionService],
   controllers: [SubscriptionController],
 })
