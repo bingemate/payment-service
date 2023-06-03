@@ -30,6 +30,7 @@ export class SubscriptionController {
         sig,
         process.env.STRIPE_CANCELED_SUB_KEY,
       );
+      console.log(event);
       this.subscriptionService.userSubscribed(
         event.data.object['client_reference_id'],
         event.data.object['subscription_id'],
@@ -50,6 +51,7 @@ export class SubscriptionController {
         sig,
         process.env.STRIPE_CANCELED_SUB_KEY,
       );
+      console.log(event);
       this.subscriptionService.userUnsubscribed(
         event.data.object['client_reference_id'],
         event.data.object['subscription_id'],
