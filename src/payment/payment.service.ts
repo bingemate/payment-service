@@ -20,9 +20,9 @@ export default class PaymentService {
       currency: 'EUR',
       line_items: [
         {
-          price: 'prod_O0v1eTKazBiKZX',
-          adjustable_quantity: {
-            enabled: false,
+          price_data: {
+            currency: 'EUR',
+            product: 'prod_O0v1eTKazBiKZX',
           },
         },
       ],
