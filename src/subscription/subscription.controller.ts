@@ -91,11 +91,11 @@ export class SubscriptionController {
   @Get('checkout')
   async getCheckoutSession(@Headers() headers) {
     const userId = headers['user-id'] as string;
-    if (
-      (await this.subscriptionService.getSubscriptionByUserId(userId)) !==
-      undefined
-    ) {
-      throw new BadRequestException();
+    const subscription = await this.subscriptionService.getSubscriptionByUserId(
+      userId,
+    );
+    if (subscription) {
+      throw new BadRequestException('Already subscribed');
     }
     const customer = await this.customerService.getById(userId);
     const checkout = await this.stripeService.getCheckoutSessionUrl(
