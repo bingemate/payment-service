@@ -48,6 +48,14 @@ export default class StripeService {
     });
   }
 
+  async updatePaymentMethod(subscriptionId: string, intentId: string) {
+    const intent = await this.stripe.setupIntents.retrieve(intentId);
+    const paymentId = intent.payment_method;
+    this.stripe.subscriptions.update(subscriptionId, {
+      default_payment_method: paymentId,
+    });
+  }
+
   constructEvent(body, sig: string, key: string) {
     return this.stripe?.webhooks.constructEvent(body, sig, key);
   }

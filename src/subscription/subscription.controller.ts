@@ -44,19 +44,11 @@ export class SubscriptionController {
         sig,
         process.env.STRIPE_CREATED_SUB_KEY,
       );
-      console.log(event);
-      const userId = event.data.object['client_reference_id'];
-      const customerId = event.data.object['customer'];
-      const subscriptionId = event.data.object['subscription'];
-      await this.userService.userSubscribed(userId);
-      const customer = await this.customerService.createCustomer(
-        userId,
-        customerId,
-      );
-      await this.subscriptionService.createSubscription(
-        subscriptionId,
-        customer,
-      );
+      if (event.data.object['mode'] === 'subscription') {
+        await this.subscription(event);
+      } else {
+        await this.methodPayment(event);
+      }
     } catch (err) {
       throw new BadRequestException(`Webhook Error: ${err.message}`);
     }
@@ -127,5 +119,23 @@ export class SubscriptionController {
       customer?.customerId,
     );
     return { url: checkout.url };
+  }
+
+  private async methodPayment(event) {
+    const intentId = event.data.object['setup_intent'];
+    const subscriptionId = event.data.object.metadata['subscription_id'];
+    await this.stripeService.updatePaymentMethod(subscriptionId, intentId);
+  }
+
+  private async subscription(event) {
+    const userId = event.data.object['client_reference_id'];
+    const customerId = event.data.object['customer'];
+    const subscriptionId = event.data.object['subscription'];
+    await this.userService.userSubscribed(userId);
+    const customer = await this.customerService.createCustomer(
+      userId,
+      customerId,
+    );
+    await this.subscriptionService.createSubscription(subscriptionId, customer);
   }
 }
