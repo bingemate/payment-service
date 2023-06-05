@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { ServiceStatusModule } from './service-status/service-status.module';
+import { InvoiceModule } from './invoice/invoice.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ServiceStatusModule } from './service-status/service-status.module';
     }),
     ServiceStatusModule,
     SubscriptionModule,
+    InvoiceModule,
   ],
   providers: [],
 })

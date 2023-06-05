@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 
 @Injectable()
 export default class StripeService {
-  private stripe;
+  private stripe: Stripe;
   constructor() {
     this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
       apiVersion: '2022-11-15',
@@ -51,10 +51,14 @@ export default class StripeService {
   async updatePaymentMethod(intentId: string) {
     const intent = await this.stripe.setupIntents.retrieve(intentId);
     const subscriptionId = intent.metadata['subscription_id'] as string;
-    const paymentId = intent.payment_method;
-    this.stripe.subscriptions.update(subscriptionId, {
+    const paymentId = intent.payment_method as string;
+    await this.stripe.subscriptions.update(subscriptionId, {
       default_payment_method: paymentId,
     });
+  }
+
+  async getCustomerInvoices(customerId: string) {
+    return (await this.stripe.invoices.list({ customer: customerId })).data;
   }
 
   constructEvent(body, sig: string, key: string) {
