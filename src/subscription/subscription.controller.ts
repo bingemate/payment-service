@@ -44,6 +44,7 @@ export class SubscriptionController {
         sig,
         process.env.STRIPE_CREATED_SUB_KEY,
       );
+      console.log(event);
       const userId = event.data.object['client_reference_id'];
       const customerId = event.data.object['customer'];
       const subscriptionId = event.data.object['subscription'];
@@ -88,8 +89,8 @@ export class SubscriptionController {
   @ApiBadRequestResponse()
   @ApiOkResponse()
   @HttpCode(200)
-  @Get('checkout')
-  async getCheckoutSession(@Headers() headers) {
+  @Get('subscribe')
+  async subscribe(@Headers() headers) {
     const userId = headers['user-id'] as string;
     const subscription = await this.subscriptionService.getSubscriptionByUserId(
       userId,
@@ -98,8 +99,31 @@ export class SubscriptionController {
       throw new BadRequestException('Already subscribed');
     }
     const customer = await this.customerService.getById(userId);
-    const checkout = await this.stripeService.getCheckoutSessionUrl(
+    const checkout = await this.stripeService.getCheckoutSubscribeUrl(
       userId,
+      customer?.customerId,
+    );
+    return { url: checkout.url };
+  }
+
+  @ApiOperation({
+    description: 'Change payment method',
+  })
+  @ApiBadRequestResponse()
+  @ApiOkResponse()
+  @HttpCode(200)
+  @Get('payment-method')
+  async updatePaymentMethod(@Headers() headers) {
+    const userId = headers['user-id'] as string;
+    const subscription = await this.subscriptionService.getSubscriptionByUserId(
+      userId,
+    );
+    if (!subscription) {
+      throw new BadRequestException('Not subscribed');
+    }
+    const customer = await this.customerService.getById(userId);
+    const checkout = await this.stripeService.getCheckoutMethodUrl(
+      subscription.id,
       customer?.customerId,
     );
     return { url: checkout.url };

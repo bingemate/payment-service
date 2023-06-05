@@ -10,12 +10,17 @@ export default class StripeService {
     });
   }
 
-  async getCheckoutSessionUrl(userId: string, customerId: string | undefined) {
+  async getCheckoutSubscribeUrl(
+    userId: string,
+    customerId: string | undefined,
+  ) {
     return await this.stripe.checkout.sessions.create({
+      payment_method_types: ['card', 'paypal'],
       mode: 'subscription',
       customer: customerId,
       client_reference_id: userId,
       success_url: `${process.env.FRONT_URL}/subscription/success`,
+      cancel_url: `${process.env.FRONT_URL}/subscriptions/subscriptions-list`,
       allow_promotion_codes: true,
       currency: 'EUR',
       line_items: [
@@ -24,6 +29,22 @@ export default class StripeService {
           price: 'price_1NEtBTBs8hPuOGwOynwwc2iQ',
         },
       ],
+    });
+  }
+
+  async getCheckoutMethodUrl(subscriptionId: string, customerId: string) {
+    return await this.stripe.checkout.sessions.create({
+      payment_method_types: ['card', 'paypal'],
+      mode: 'setup',
+      customer: customerId,
+      success_url: `${process.env.FRONT_URL}`,
+      cancel_url: `${process.env.FRONT_URL}`,
+      setup_intent_data: {
+        metadata: {
+          customer_id: customerId,
+          subscription_id: subscriptionId,
+        },
+      },
     });
   }
 
