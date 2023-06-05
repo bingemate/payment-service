@@ -18,12 +18,14 @@ import {
 import SubscriptionService from './subscription.service';
 import StripeService from '../stripe/stripe.service';
 import CustomerService from '../customer/customer.service';
+import UserService from '../user/user.service';
 
 @ApiTags('/subscription')
 @Controller({ path: '/subscription' })
 export class SubscriptionController {
   constructor(
     private subscriptionService: SubscriptionService,
+    private userService: UserService,
     private customerService: CustomerService,
     private stripeService: StripeService,
   ) {}
@@ -44,8 +46,16 @@ export class SubscriptionController {
       );
       const userId = event.data.object['client_reference_id'];
       const customerId = event.data.object['customer'];
-      await this.subscriptionService.userSubscribed(userId);
-      await this.customerService.createCustomer(userId, customerId);
+      const subscriptionId = event.data.object['subscription'];
+      await this.userService.userSubscribed(userId);
+      const customer = await this.customerService.createCustomer(
+        userId,
+        customerId,
+      );
+      await this.subscriptionService.createSubscription(
+        subscriptionId,
+        customer,
+      );
     } catch (err) {
       throw new BadRequestException(`Webhook Error: ${err.message}`);
     }
@@ -62,9 +72,11 @@ export class SubscriptionController {
         sig,
         process.env.STRIPE_CANCELED_SUB_KEY,
       );
-      this.subscriptionService.userUnsubscribed(
+      const subscriptionId = event.data.object['subscription'];
+      this.userService.userUnsubscribed(
         event.data.object['client_reference_id'],
       );
+      await this.subscriptionService.deleteSubscription(subscriptionId);
     } catch (err) {
       throw new BadRequestException(`Webhook Error: ${err.message}`);
     }
@@ -79,6 +91,12 @@ export class SubscriptionController {
   @Get('checkout')
   async getCheckoutSession(@Headers() headers) {
     const userId = headers['user-id'] as string;
+    if (
+      (await this.subscriptionService.getSubscriptionByUserId(userId)) !==
+      undefined
+    ) {
+      throw new BadRequestException();
+    }
     const customer = await this.customerService.getById(userId);
     const checkout = await this.stripeService.getCheckoutSessionUrl(
       userId,

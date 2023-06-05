@@ -4,8 +4,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { ServiceStatusModule } from './service-status/service-status.module';
-import { CustomerModule } from './customer/customer.module';
-import { StripeModule } from './stripe/stripe.module';
 
 @Module({
   imports: [
@@ -22,8 +20,6 @@ import { StripeModule } from './stripe/stripe.module';
       autoLoadEntities: true,
       logging: false,
     }),
-    StripeModule,
-    CustomerModule,
     ServiceStatusModule,
     SubscriptionModule,
   ],
