@@ -1,22 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import Stripe from 'stripe';
-import CustomerService from '../customer/customer.service';
 
 @Injectable()
-export default class PaymentService {
-  private stripe: Stripe;
-
-  constructor(private customerService: CustomerService) {
+export default class StripeService {
+  private stripe;
+  constructor() {
     this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
       apiVersion: '2022-11-15',
     });
   }
 
-  public async getCheckoutSessionUrl(userId: string) {
-    const customer = await this.customerService.getById(userId);
+  async getCheckoutSessionUrl(userId: string, customerId: string | undefined) {
     return await this.stripe.checkout.sessions.create({
       mode: 'subscription',
-      customer: customer ? customer.customerId : undefined,
+      customer: customerId,
       client_reference_id: userId,
       success_url: `${process.env.FRONT_URL}/subscription/success`,
       allow_promotion_codes: true,
@@ -29,7 +26,8 @@ export default class PaymentService {
       ],
     });
   }
-  public constructEvent(body, sig: string, key: string) {
+
+  constructEvent(body, sig: string, key: string) {
     return this.stripe?.webhooks.constructEvent(body, sig, key);
   }
 }

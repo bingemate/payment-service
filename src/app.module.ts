@@ -3,9 +3,9 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { SubscriptionModule } from './subscription/subscription.module';
-import { PaymentModule } from './payment/payment.module';
 import { ServiceStatusModule } from './service-status/service-status.module';
 import { CustomerModule } from './customer/customer.module';
+import { StripeModule } from './stripe/stripe.module';
 
 @Module({
   imports: [
@@ -22,8 +22,8 @@ import { CustomerModule } from './customer/customer.module';
       autoLoadEntities: true,
       logging: false,
     }),
+    StripeModule,
     CustomerModule,
-    PaymentModule,
     ServiceStatusModule,
     SubscriptionModule,
   ],
