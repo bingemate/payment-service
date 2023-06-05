@@ -123,8 +123,7 @@ export class SubscriptionController {
 
   private async methodPayment(event) {
     const intentId = event.data.object['setup_intent'];
-    const subscriptionId = event.data.object.metadata['subscription_id'];
-    await this.stripeService.updatePaymentMethod(subscriptionId, intentId);
+    await this.stripeService.updatePaymentMethod(intentId);
   }
 
   private async subscription(event) {

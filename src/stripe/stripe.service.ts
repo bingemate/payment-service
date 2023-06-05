@@ -48,8 +48,9 @@ export default class StripeService {
     });
   }
 
-  async updatePaymentMethod(subscriptionId: string, intentId: string) {
+  async updatePaymentMethod(intentId: string) {
     const intent = await this.stripe.setupIntents.retrieve(intentId);
+    const subscriptionId = intent.metadata['subscription_id'] as string;
     const paymentId = intent.payment_method;
     this.stripe.subscriptions.update(subscriptionId, {
       default_payment_method: paymentId,
