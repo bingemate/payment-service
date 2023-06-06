@@ -68,7 +68,6 @@ export class SubscriptionController {
         sig,
         process.env.STRIPE_CANCELED_SUB_KEY,
       );
-      console.log(event);
       const subscriptionId = event.data.object['id'];
       const customer = await this.customerService.getBySubId(subscriptionId);
       this.userService.userUnsubscribed(customer.userId).subscribe();
