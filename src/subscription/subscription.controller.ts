@@ -71,7 +71,7 @@ export class SubscriptionController {
       console.log(event);
       const subscriptionId = event.data.object['id'];
       const customer = await this.customerService.getBySubId(subscriptionId);
-      this.userService.userUnsubscribed(customer.userId);
+      this.userService.userUnsubscribed(customer.userId).subscribe();
       await this.subscriptionService.deleteSubscription(subscriptionId);
     } catch (err) {
       throw new BadRequestException(`Webhook Error: ${err.message}`);
@@ -151,7 +151,7 @@ export class SubscriptionController {
     const userId = event.data.object['client_reference_id'];
     const customerId = event.data.object['customer'];
     const subscriptionId = event.data.object['subscription'];
-    await this.userService.userSubscribed(userId);
+    this.userService.userSubscribed(userId).subscribe();
     const customer = await this.customerService.createCustomer(
       userId,
       customerId,
