@@ -27,6 +27,7 @@ export default class SubscriptionService {
   }
 
   async deleteSubscription(id: string) {
+    console.log(id);
     await this.subscriptionRepository.delete({ id });
   }
 }
