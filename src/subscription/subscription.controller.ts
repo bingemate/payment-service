@@ -57,11 +57,14 @@ export class SubscriptionController {
   @ApiOkResponse()
   @HttpCode(200)
   @Post('canceled')
-  async canceledSubscription(@Headers() headers, @Body() body: string) {
+  async canceledSubscription(
+    @Headers() headers,
+    @Req() request: RawBodyRequest<Request>,
+  ) {
     try {
       const sig = headers['stripe-signature'];
       const event = this.stripeService.constructEvent(
-        body,
+        request.rawBody,
         sig,
         process.env.STRIPE_CANCELED_SUB_KEY,
       );
