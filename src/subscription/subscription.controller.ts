@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -19,6 +20,8 @@ import SubscriptionService from './subscription.service';
 import StripeService from '../stripe/stripe.service';
 import CustomerService from '../customer/customer.service';
 import UserService from '../user/user.service';
+import { NotFoundError } from 'rxjs';
+import { SubscriptionDto } from './dto/subscription.dto';
 
 @ApiTags('/subscription')
 @Controller({ path: '/subscription' })
@@ -139,6 +142,36 @@ export class SubscriptionController {
       throw new BadRequestException('Not subscribed');
     }
     await this.stripeService.cancelSubscription(subscription.id);
+  }
+
+  @ApiOperation({
+    description: 'Get subscription details',
+  })
+  @ApiNotFoundResponse()
+  @ApiOkResponse()
+  @HttpCode(200)
+  @Get()
+  async getSubscriptionDetails(@Headers() headers): Promise<SubscriptionDto> {
+    const userId = headers['user-id'] as string;
+    const subscription = await this.subscriptionService.getSubscriptionByUserId(
+      userId,
+    );
+    if (!subscription) {
+      throw new NotFoundError('Not subscribed');
+    }
+    const subscriptionDetails = await this.stripeService.getSubscription(
+      subscription.id,
+    );
+    return {
+      status: subscriptionDetails.status,
+      price: subscriptionDetails.items.data[0].price.unit_amount / 100,
+      paymentMethod: subscriptionDetails.payment_settings
+        .payment_method_types as unknown as 'card' | 'paypal',
+      isCanceled: subscriptionDetails.cancel_at_period_end,
+      startedAt: subscriptionDetails.start_date,
+      nextPaymentAt: subscriptionDetails.current_period_end,
+      endAt: subscriptionDetails.cancel_at,
+    };
   }
 
   private async methodPayment(event) {

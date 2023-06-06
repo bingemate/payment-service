@@ -67,6 +67,10 @@ export default class StripeService {
     return (await this.stripe.invoices.list({ customer: customerId })).data;
   }
 
+  async getSubscription(subscriptionId: string) {
+    return await this.stripe.subscriptions.retrieve(subscriptionId);
+  }
+
   constructEvent(body, sig: string, key: string) {
     return this.stripe?.webhooks.constructEvent(body, sig, key);
   }
