@@ -17,4 +17,10 @@ export default class CustomerService {
   async createCustomer(userId: string, customerId: string) {
     return await this.customerRepository.save({ userId, customerId });
   }
+
+  async getBySubId(subscriptionId: any) {
+    return await this.customerRepository.findOneBy({
+      subscriptions: { id: subscriptionId },
+    });
+  }
 }

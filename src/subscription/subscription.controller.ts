@@ -69,9 +69,8 @@ export class SubscriptionController {
         process.env.STRIPE_CANCELED_SUB_KEY,
       );
       const subscriptionId = event.data.object['subscription'];
-      this.userService.userUnsubscribed(
-        event.data.object['client_reference_id'],
-      );
+      const customer = await this.customerService.getBySubId(subscriptionId);
+      this.userService.userUnsubscribed(customer.userId);
       await this.subscriptionService.deleteSubscription(subscriptionId);
     } catch (err) {
       throw new BadRequestException(`Webhook Error: ${err.message}`);
