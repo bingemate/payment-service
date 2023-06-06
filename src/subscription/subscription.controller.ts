@@ -1,7 +1,7 @@
 import {
   BadRequestException,
-  Body,
   Controller,
+  Delete,
   Get,
   Headers,
   HttpCode,
@@ -121,6 +121,24 @@ export class SubscriptionController {
       customer?.customerId,
     );
     return { url: checkout.url };
+  }
+
+  @ApiOperation({
+    description: 'Stop subscription when period ends',
+  })
+  @ApiBadRequestResponse()
+  @ApiOkResponse()
+  @HttpCode(200)
+  @Delete()
+  async endSubscription(@Headers() headers) {
+    const userId = headers['user-id'] as string;
+    const subscription = await this.subscriptionService.getSubscriptionByUserId(
+      userId,
+    );
+    if (!subscription) {
+      throw new BadRequestException('Not subscribed');
+    }
+    await this.stripeService.cancelSubscription(subscription.id);
   }
 
   private async methodPayment(event) {

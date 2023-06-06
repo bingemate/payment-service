@@ -57,6 +57,12 @@ export default class StripeService {
     });
   }
 
+  async cancelSubscription(subscriptionId: string) {
+    await this.stripe.subscriptions.update(subscriptionId, {
+      cancel_at_period_end: true,
+    });
+  }
+
   async getCustomerInvoices(customerId: string) {
     return (await this.stripe.invoices.list({ customer: customerId })).data;
   }
