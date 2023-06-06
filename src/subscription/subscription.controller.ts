@@ -1,39 +1,54 @@
 import {
   BadRequestException,
-  Body,
   Controller,
   Delete,
+  Get,
   Headers,
   HttpCode,
   Post,
+  RawBodyRequest,
+  Req,
 } from '@nestjs/common';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import PaymentService from '../payment/payment.service';
+import {
+  ApiBadRequestResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import SubscriptionService from './subscription.service';
+import StripeService from '../stripe/stripe.service';
+import CustomerService from '../customer/customer.service';
+import UserService from '../user/user.service';
 
 @ApiTags('/subscription')
 @Controller({ path: '/subscription' })
 export class SubscriptionController {
   constructor(
-    private paymentService: PaymentService,
     private subscriptionService: SubscriptionService,
+    private userService: UserService,
+    private customerService: CustomerService,
+    private stripeService: StripeService,
   ) {}
 
   @ApiOkResponse()
   @HttpCode(200)
-  @Delete('/created')
-  async createdSubscription(@Headers() headers, @Body() body) {
+  @Post('created')
+  async createdSubscription(
+    @Headers() headers,
+    @Req() request: RawBodyRequest<Request>,
+  ) {
     try {
       const sig = headers['stripe-signature'];
-      const event = this.paymentService.constructEvent(
-        body,
+      const event = this.stripeService.constructEvent(
+        request.rawBody,
         sig,
-        process.env.STRIPE_CANCELED_SUB_KEY,
+        process.env.STRIPE_CREATED_SUB_KEY,
       );
-      this.subscriptionService.userSubscribed(
-        event.data.object['client_reference_id'],
-        event.data.object['subscription_id'],
-      );
+      if (event.data.object['mode'] === 'subscription') {
+        await this.subscription(event);
+      } else {
+        await this.methodPayment(event);
+      }
     } catch (err) {
       throw new BadRequestException(`Webhook Error: ${err.message}`);
     }
@@ -41,21 +56,106 @@ export class SubscriptionController {
 
   @ApiOkResponse()
   @HttpCode(200)
-  @Post('/canceled')
-  async canceledSubscription(@Headers() headers, @Body() body) {
+  @Post('canceled')
+  async canceledSubscription(
+    @Headers() headers,
+    @Req() request: RawBodyRequest<Request>,
+  ) {
     try {
       const sig = headers['stripe-signature'];
-      const event = this.paymentService.constructEvent(
-        body,
+      const event = this.stripeService.constructEvent(
+        request.rawBody,
         sig,
         process.env.STRIPE_CANCELED_SUB_KEY,
       );
-      this.subscriptionService.userUnsubscribed(
-        event.data.object['client_reference_id'],
-        event.data.object['subscription_id'],
-      );
+      console.log(event);
+      const subscriptionId = event.data.object['id'];
+      const customer = await this.customerService.getBySubId(subscriptionId);
+      this.userService.userUnsubscribed(customer.userId).subscribe();
+      await this.subscriptionService.deleteSubscription(subscriptionId);
     } catch (err) {
       throw new BadRequestException(`Webhook Error: ${err.message}`);
     }
+  }
+
+  @ApiOperation({
+    description: 'Get checkout session',
+  })
+  @ApiBadRequestResponse()
+  @ApiOkResponse()
+  @HttpCode(200)
+  @Get('subscribe')
+  async subscribe(@Headers() headers) {
+    const userId = headers['user-id'] as string;
+    const subscription = await this.subscriptionService.getSubscriptionByUserId(
+      userId,
+    );
+    if (subscription) {
+      throw new BadRequestException('Already subscribed');
+    }
+    const customer = await this.customerService.getById(userId);
+    const checkout = await this.stripeService.getCheckoutSubscribeUrl(
+      userId,
+      customer?.customerId,
+    );
+    return { url: checkout.url };
+  }
+
+  @ApiOperation({
+    description: 'Change payment method',
+  })
+  @ApiBadRequestResponse()
+  @ApiOkResponse()
+  @HttpCode(200)
+  @Get('payment-method')
+  async updatePaymentMethod(@Headers() headers) {
+    const userId = headers['user-id'] as string;
+    const subscription = await this.subscriptionService.getSubscriptionByUserId(
+      userId,
+    );
+    if (!subscription) {
+      throw new BadRequestException('Not subscribed');
+    }
+    const customer = await this.customerService.getById(userId);
+    const checkout = await this.stripeService.getCheckoutMethodUrl(
+      subscription.id,
+      customer?.customerId,
+    );
+    return { url: checkout.url };
+  }
+
+  @ApiOperation({
+    description: 'Stop subscription when period ends',
+  })
+  @ApiBadRequestResponse()
+  @ApiOkResponse()
+  @HttpCode(200)
+  @Delete()
+  async endSubscription(@Headers() headers) {
+    const userId = headers['user-id'] as string;
+    const subscription = await this.subscriptionService.getSubscriptionByUserId(
+      userId,
+    );
+    if (!subscription) {
+      throw new BadRequestException('Not subscribed');
+    }
+    await this.stripeService.cancelSubscription(subscription.id);
+  }
+
+  private async methodPayment(event) {
+    const intentId = event.data.object['setup_intent'];
+    await this.stripeService.updatePaymentMethod(intentId);
+  }
+
+  private async subscription(event) {
+    const userId = event.data.object['client_reference_id'];
+    const customerId = event.data.object['customer'];
+    const subscriptionId = event.data.object['subscription'];
+    this.userService.userSubscribed(userId).subscribe();
+    const customer = await this.customerService.createCustomer(
+      userId,
+      customerId,
+    );
+    await this.subscriptionService.createSubscription(subscriptionId, customer);
   }
 }
