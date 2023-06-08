@@ -1,4 +1,10 @@
-import { Controller, Get, Headers, HttpCode } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Headers,
+  HttpCode,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiOkResponse,
@@ -27,6 +33,9 @@ export class InvoiceController {
   async updatePaymentMethod(@Headers() headers): Promise<InvoiceDto[]> {
     const userId = headers['user-id'] as string;
     const customer = await this.customerService.getById(userId);
+    if (!customer) {
+      throw new NotFoundException();
+    }
     const invoices = await this.stripeService.getCustomerInvoices(
       customer.customerId,
     );
