@@ -5,6 +5,7 @@ import {
   Get,
   Headers,
   HttpCode,
+  NotFoundException,
   Post,
   RawBodyRequest,
   Req,
@@ -20,7 +21,6 @@ import SubscriptionService from './subscription.service';
 import StripeService from '../stripe/stripe.service';
 import CustomerService from '../customer/customer.service';
 import UserService from '../user/user.service';
-import { NotFoundError } from 'rxjs';
 import { SubscriptionDto } from './dto/subscription.dto';
 
 @ApiTags('/subscription')
@@ -157,7 +157,7 @@ export class SubscriptionController {
       userId,
     );
     if (!subscription) {
-      throw new NotFoundError('Not subscribed');
+      throw new NotFoundException('Not subscribed');
     }
     const subscriptionDetails = await this.stripeService.getSubscription(
       subscription.id,
