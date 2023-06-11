@@ -24,13 +24,13 @@ export class InvoiceController {
   ) {}
 
   @ApiOperation({
-    description: 'Change payment method',
+    description: 'Retrieves user invoices',
   })
   @ApiBadRequestResponse()
   @ApiOkResponse()
   @HttpCode(200)
   @Get()
-  async updatePaymentMethod(@Headers() headers): Promise<InvoiceDto[]> {
+  async getInvoices(@Headers() headers): Promise<InvoiceDto[]> {
     const userId = headers['user-id'] as string;
     const customer = await this.customerService.getById(userId);
     if (!customer) {
