@@ -8,7 +8,7 @@ export class SubscriptionDto {
   @ApiProperty()
   price: number;
   @ApiProperty()
-  paymentMethod: string;
+  paymentMethods: string[];
   @ApiProperty()
   startedAt: number;
   @ApiProperty()
