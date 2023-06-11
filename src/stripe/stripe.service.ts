@@ -19,7 +19,7 @@ export default class StripeService {
       mode: 'subscription',
       customer: customerId,
       client_reference_id: userId,
-      success_url: `${process.env.FRONT_URL}/subscription/success`,
+      success_url: `${process.env.FRONT_URL}/subscriptions/success`,
       cancel_url: `${process.env.FRONT_URL}/subscriptions/subscriptions-list`,
       allow_promotion_codes: true,
       currency: 'EUR',
@@ -38,7 +38,7 @@ export default class StripeService {
       mode: 'setup',
       customer: customerId,
       success_url: `${process.env.FRONT_URL}`,
-      cancel_url: `${process.env.FRONT_URL}`,
+      cancel_url: `${process.env.FRONT_URL}/subscriptions/my-subscription`,
       setup_intent_data: {
         metadata: {
           customer_id: customerId,
