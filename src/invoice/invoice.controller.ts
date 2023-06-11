@@ -44,6 +44,9 @@ export class InvoiceController {
       invoicePdfUrl: invoice.invoice_pdf,
       created: invoice.created,
       status: invoice.status,
+      paymentMethod: invoice.payment_settings.payment_method_types[0],
+      price: invoice.paid ? invoice.amount_paid : invoice.amount_due,
+      currency: invoice.currency,
     }));
   }
 }
