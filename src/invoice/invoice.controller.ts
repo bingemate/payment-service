@@ -14,7 +14,6 @@ import {
 import StripeService from '../stripe/stripe.service';
 import CustomerService from '../customer/customer.service';
 import { InvoiceDto } from './dto/invoice.dto';
-import Stripe from 'stripe';
 
 @ApiTags('/invoice')
 @Controller({ path: '/invoice' })
@@ -40,14 +39,11 @@ export class InvoiceController {
     const invoices = await this.stripeService.getCustomerInvoices(
       customer.customerId,
     );
-    console.log(invoices);
     return invoices.map((invoice) => ({
       invoiceUrl: invoice.hosted_invoice_url,
       invoicePdfUrl: invoice.invoice_pdf,
       created: invoice.created,
       status: invoice.status,
-      paymentMethods: (invoice.default_payment_method as Stripe.PaymentMethod)
-        ?.type,
       price: invoice.paid ? invoice.amount_paid : invoice.amount_due,
       currency: invoice.currency,
     }));

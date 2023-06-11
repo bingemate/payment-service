@@ -10,8 +10,6 @@ export class InvoiceDto {
   @ApiProperty()
   status: string;
   @ApiProperty()
-  paymentMethods: string;
-  @ApiProperty()
   price: number;
   @ApiProperty()
   currency: string;

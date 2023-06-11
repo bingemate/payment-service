@@ -8,8 +8,6 @@ export class SubscriptionDto {
   @ApiProperty()
   price: number;
   @ApiProperty()
-  paymentMethods: string[];
-  @ApiProperty()
   startedAt: number;
   @ApiProperty()
   nextPaymentAt: number;

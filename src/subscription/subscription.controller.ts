@@ -165,7 +165,6 @@ export class SubscriptionController {
     return {
       status: subscriptionDetails.status,
       price: subscriptionDetails.items.data[0].price.unit_amount / 100,
-      paymentMethods: subscriptionDetails.payment_settings.payment_method_types,
       isCanceled: subscriptionDetails.cancel_at_period_end,
       startedAt: subscriptionDetails.start_date,
       nextPaymentAt: subscriptionDetails.current_period_end,
