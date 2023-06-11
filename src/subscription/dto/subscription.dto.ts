@@ -8,7 +8,7 @@ export class SubscriptionDto {
   @ApiProperty()
   price: number;
   @ApiProperty()
-  paymentMethod: 'card' | 'paypal';
+  paymentMethod: string;
   @ApiProperty()
   startedAt: number;
   @ApiProperty()
