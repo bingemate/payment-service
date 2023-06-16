@@ -1,4 +1,10 @@
-import { Controller, Get, Headers, HttpCode } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Headers,
+  HttpCode,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiOkResponse,
@@ -18,15 +24,18 @@ export class InvoiceController {
   ) {}
 
   @ApiOperation({
-    description: 'Change payment method',
+    description: 'Retrieves user invoices',
   })
   @ApiBadRequestResponse()
   @ApiOkResponse()
   @HttpCode(200)
   @Get()
-  async updatePaymentMethod(@Headers() headers): Promise<InvoiceDto[]> {
+  async getInvoices(@Headers() headers): Promise<InvoiceDto[]> {
     const userId = headers['user-id'] as string;
     const customer = await this.customerService.getById(userId);
+    if (!customer) {
+      throw new NotFoundException();
+    }
     const invoices = await this.stripeService.getCustomerInvoices(
       customer.customerId,
     );
@@ -35,6 +44,8 @@ export class InvoiceController {
       invoicePdfUrl: invoice.invoice_pdf,
       created: invoice.created,
       status: invoice.status,
+      price: invoice.paid ? invoice.amount_paid : invoice.amount_due,
+      currency: invoice.currency,
     }));
   }
 }

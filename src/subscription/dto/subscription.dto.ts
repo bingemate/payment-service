@@ -1,16 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class InvoiceDto {
+export class SubscriptionDto {
   @ApiProperty()
-  invoiceUrl: string;
-  @ApiProperty()
-  invoicePdfUrl: string;
-  @ApiProperty()
-  created: number;
+  isCanceled: boolean;
   @ApiProperty()
   status: string;
   @ApiProperty()
   price: number;
   @ApiProperty()
-  currency: string;
+  startedAt: number;
+  @ApiProperty()
+  nextPaymentAt: number;
+  @ApiProperty()
+  endAt: number;
 }

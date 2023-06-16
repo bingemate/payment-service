@@ -5,12 +5,14 @@ import {
   Get,
   Headers,
   HttpCode,
+  NotFoundException,
   Post,
   RawBodyRequest,
   Req,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -19,6 +21,7 @@ import SubscriptionService from './subscription.service';
 import StripeService from '../stripe/stripe.service';
 import CustomerService from '../customer/customer.service';
 import UserService from '../user/user.service';
+import { SubscriptionDto } from './dto/subscription.dto';
 
 @ApiTags('/subscription')
 @Controller({ path: '/subscription' })
@@ -68,7 +71,6 @@ export class SubscriptionController {
         sig,
         process.env.STRIPE_CANCELED_SUB_KEY,
       );
-      console.log(event);
       const subscriptionId = event.data.object['id'];
       const customer = await this.customerService.getBySubId(subscriptionId);
       this.userService.userUnsubscribed(customer.userId).subscribe();
@@ -140,6 +142,34 @@ export class SubscriptionController {
       throw new BadRequestException('Not subscribed');
     }
     await this.stripeService.cancelSubscription(subscription.id);
+  }
+
+  @ApiOperation({
+    description: 'Get subscription details',
+  })
+  @ApiNotFoundResponse()
+  @ApiOkResponse()
+  @HttpCode(200)
+  @Get()
+  async getSubscriptionDetails(@Headers() headers): Promise<SubscriptionDto> {
+    const userId = headers['user-id'] as string;
+    const subscription = await this.subscriptionService.getSubscriptionByUserId(
+      userId,
+    );
+    if (!subscription) {
+      throw new NotFoundException('Not subscribed');
+    }
+    const subscriptionDetails = await this.stripeService.getSubscription(
+      subscription.id,
+    );
+    return {
+      status: subscriptionDetails.status,
+      price: subscriptionDetails.items.data[0].price.unit_amount / 100,
+      isCanceled: subscriptionDetails.cancel_at_period_end,
+      startedAt: subscriptionDetails.start_date,
+      nextPaymentAt: subscriptionDetails.current_period_end,
+      endAt: subscriptionDetails.cancel_at,
+    };
   }
 
   private async methodPayment(event) {
