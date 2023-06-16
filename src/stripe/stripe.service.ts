@@ -15,7 +15,7 @@ export default class StripeService {
     customerId: string | undefined,
   ) {
     return await this.stripe.checkout.sessions.create({
-      payment_method_types: ['card', 'paypal'],
+      payment_method_types: ['card'],
       mode: 'subscription',
       customer: customerId,
       client_reference_id: userId,
