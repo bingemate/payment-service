@@ -26,7 +26,7 @@ export default class StripeService {
       line_items: [
         {
           quantity: 1,
-          price: 'price_1NEtBTBs8hPuOGwOynwwc2iQ',
+          price: process.env.STRIPE_PRODUCT,
         },
       ],
     });
