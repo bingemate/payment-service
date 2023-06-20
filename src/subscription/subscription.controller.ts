@@ -98,7 +98,7 @@ export class SubscriptionController {
     if (subscription) {
       throw new BadRequestException('Already subscribed');
     }
-    const customer = await this.customerService.getById(userId);
+    const customer = await this.customerService.getByUserId(userId);
     const checkout = await this.stripeService.getCheckoutSubscribeUrl(
       userId,
       customer?.customerId,
@@ -121,7 +121,7 @@ export class SubscriptionController {
     if (!subscription) {
       throw new BadRequestException('Not subscribed');
     }
-    const customer = await this.customerService.getById(userId);
+    const customer = await this.customerService.getByUserId(userId);
     const checkout = await this.stripeService.getCheckoutMethodUrl(
       subscription.id,
       customer?.customerId,
@@ -224,7 +224,7 @@ export class SubscriptionController {
     @Headers() headers,
     @Body() create: CreateSubscriptionDto,
   ) {
-    const customer = await this.customerService.getById(create.customerId);
+    const customer = await this.customerService.getByUserId(create.customerId);
     if (!customer) {
       throw new NotFoundException('Customer not found');
     }

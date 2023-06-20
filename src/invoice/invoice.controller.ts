@@ -32,7 +32,7 @@ export class InvoiceController {
   @Get()
   async getInvoices(@Headers() headers): Promise<InvoiceDto[]> {
     const userId = headers['user-id'] as string;
-    const customer = await this.customerService.getById(userId);
+    const customer = await this.customerService.getByUserId(userId);
     if (!customer) {
       throw new NotFoundException();
     }

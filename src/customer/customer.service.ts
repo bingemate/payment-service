@@ -10,7 +10,7 @@ export default class CustomerService {
     private readonly customerRepository: Repository<CustomerEntity>,
   ) {}
 
-  async getById(userId: string) {
+  async getByUserId(userId: string) {
     return await this.customerRepository.findOneBy({ userId });
   }
 

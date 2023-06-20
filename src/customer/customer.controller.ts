@@ -1,9 +1,11 @@
 import {
-  BadRequestException,
   Body,
   Controller,
+  Get,
   Headers,
   HttpCode,
+  NotFoundException,
+  Param,
   Post,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
@@ -22,21 +24,27 @@ export class CustomerController {
   @ApiOkResponse()
   @HttpCode(200)
   @Post()
-  async createdSubscription(
+  async createdCustomer(
     @Headers() headers,
     @Body() createCustomerDto: CreateCustomerDto,
   ) {
-    try {
-      const customerId = await this.stripeService.createCustomer(
-        createCustomerDto.email,
-        createCustomerDto.name,
-      );
-      await this.customerService.saveCustomer(
-        createCustomerDto.userId,
-        customerId,
-      );
-    } catch (err) {
-      throw new BadRequestException(`Webhook Error: ${err.message}`);
+    const customerId = await this.stripeService.createCustomer(
+      createCustomerDto.email,
+      createCustomerDto.name,
+    );
+    await this.customerService.saveCustomer(
+      createCustomerDto.userId,
+      customerId,
+    );
+  }
+
+  @ApiOkResponse()
+  @HttpCode(200)
+  @Get('/:userId')
+  async getCustomer(@Headers() headers, @Param('userId') userId: string) {
+    const customer = await this.customerService.getByUserId(userId);
+    if (!customer) {
+      throw new NotFoundException('User has no customer attached');
     }
   }
 }
