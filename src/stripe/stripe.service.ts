@@ -67,10 +67,14 @@ export default class StripeService {
     ).id;
   }
 
-  async cancelSubscription(subscriptionId: string) {
+  async stopSubscription(subscriptionId: string) {
     await this.stripe.subscriptions.update(subscriptionId, {
       cancel_at_period_end: true,
     });
+  }
+
+  async cancelSubscription(subscriptionId: string) {
+    await this.stripe.subscriptions.cancel(subscriptionId, { prorate: true });
   }
 
   async createCustomer(email: string, name: string) {

@@ -136,7 +136,7 @@ export class SubscriptionController {
   @ApiOkResponse()
   @HttpCode(200)
   @Delete()
-  async endSubscription(@Headers() headers) {
+  async stopSubscription(@Headers() headers) {
     const userId = headers['user-id'] as string;
     const subscription = await this.subscriptionService.getSubscriptionByUserId(
       userId,
@@ -144,7 +144,7 @@ export class SubscriptionController {
     if (!subscription) {
       throw new BadRequestException('Not subscribed');
     }
-    await this.stripeService.cancelSubscription(subscription.id);
+    await this.stripeService.stopSubscription(subscription.id);
   }
 
   @ApiOperation({
@@ -228,6 +228,26 @@ export class SubscriptionController {
       subscriptionId,
       customer,
     );
+  }
+
+  @ApiOperation({
+    description: 'Cancel subscription immediately',
+  })
+  @ApiBadRequestResponse()
+  @ApiOkResponse()
+  @HttpCode(200)
+  @Delete('/cancel/:subscriptionId')
+  async cancelSubscription(
+    @Headers() headers,
+    @Param('subscriptionId') subscriptionId: string,
+  ) {
+    const subscription = await this.subscriptionService.getSubscriptionById(
+      subscriptionId,
+    );
+    if (!subscription) {
+      throw new BadRequestException("Subscription doesn't exist");
+    }
+    await this.stripeService.cancelSubscription(subscriptionId);
   }
 
   private async methodPayment(event) {
