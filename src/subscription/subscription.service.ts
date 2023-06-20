@@ -20,10 +20,12 @@ export default class SubscriptionService {
   }
 
   async createSubscription(id: string, customer: CustomerEntity) {
-    return await this.subscriptionRepository.save({
-      id,
-      customer,
-    });
+    return (
+      await this.subscriptionRepository.save({
+        id,
+        customer,
+      })
+    ).id;
   }
 
   async deleteSubscription(id: string) {
