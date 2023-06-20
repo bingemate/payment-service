@@ -77,14 +77,6 @@ export default class StripeService {
     await this.stripe.subscriptions.cancel(subscriptionId, { prorate: true });
   }
 
-  async createCustomer(email: string, name: string) {
-    return (
-      await this.stripe.customers.create({
-        email,
-        name,
-      })
-    ).id;
-  }
   async getCustomerInvoices(customerId: string) {
     return (await this.stripe.invoices.list({ customer: customerId })).data;
   }
