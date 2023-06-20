@@ -10,11 +10,11 @@ export default class CustomerService {
     private readonly customerRepository: Repository<CustomerEntity>,
   ) {}
 
-  async getById(userId: string) {
+  async getByUserId(userId: string) {
     return await this.customerRepository.findOneBy({ userId });
   }
 
-  async createCustomer(userId: string, customerId: string) {
+  async saveCustomer(userId: string, customerId: string) {
     return await this.customerRepository.save({ userId, customerId });
   }
 

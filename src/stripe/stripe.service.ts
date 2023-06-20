@@ -57,10 +57,24 @@ export default class StripeService {
     });
   }
 
-  async cancelSubscription(subscriptionId: string) {
+  async createSubscription(customerId: string, cancelAt?: number) {
+    return (
+      await this.stripe.subscriptions.create({
+        customer: customerId,
+        cancel_at: cancelAt,
+        items: [{ quantity: 1, price: process.env.STRIPE_PRODUCT }],
+      })
+    ).id;
+  }
+
+  async stopSubscription(subscriptionId: string) {
     await this.stripe.subscriptions.update(subscriptionId, {
       cancel_at_period_end: true,
     });
+  }
+
+  async cancelSubscription(subscriptionId: string) {
+    await this.stripe.subscriptions.cancel(subscriptionId, { prorate: true });
   }
 
   async getCustomerInvoices(customerId: string) {
