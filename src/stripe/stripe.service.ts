@@ -15,7 +15,7 @@ export default class StripeService {
     customerId: string | undefined,
   ) {
     return await this.stripe.checkout.sessions.create({
-      payment_method_types: ['card', 'paypal'],
+      payment_method_types: ['card'],
       mode: 'subscription',
       customer: customerId,
       client_reference_id: userId,
@@ -57,12 +57,34 @@ export default class StripeService {
     });
   }
 
-  async cancelSubscription(subscriptionId: string) {
+  async createSubscription(customerId: string, cancelAt?: number) {
+    return (
+      await this.stripe.subscriptions.create({
+        customer: customerId,
+        cancel_at: cancelAt,
+        items: [{ quantity: 1, price: process.env.STRIPE_PRODUCT }],
+      })
+    ).id;
+  }
+
+  async stopSubscription(subscriptionId: string) {
     await this.stripe.subscriptions.update(subscriptionId, {
       cancel_at_period_end: true,
     });
   }
 
+  async cancelSubscription(subscriptionId: string) {
+    await this.stripe.subscriptions.cancel(subscriptionId, { prorate: true });
+  }
+
+  async createCustomer(email: string, name: string) {
+    return (
+      await this.stripe.customers.create({
+        email,
+        name,
+      })
+    ).id;
+  }
   async getCustomerInvoices(customerId: string) {
     return (await this.stripe.invoices.list({ customer: customerId })).data;
   }

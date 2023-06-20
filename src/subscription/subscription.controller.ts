@@ -1,11 +1,13 @@
 import {
   BadRequestException,
+  Body,
   Controller,
   Delete,
   Get,
   Headers,
   HttpCode,
   NotFoundException,
+  Param,
   Post,
   RawBodyRequest,
   Req,
@@ -22,6 +24,7 @@ import StripeService from '../stripe/stripe.service';
 import CustomerService from '../customer/customer.service';
 import UserService from '../user/user.service';
 import { SubscriptionDto } from './dto/subscription.dto';
+import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 
 @ApiTags('/subscription')
 @Controller({ path: '/subscription' })
@@ -133,7 +136,7 @@ export class SubscriptionController {
   @ApiOkResponse()
   @HttpCode(200)
   @Delete()
-  async endSubscription(@Headers() headers) {
+  async stopSubscription(@Headers() headers) {
     const userId = headers['user-id'] as string;
     const subscription = await this.subscriptionService.getSubscriptionByUserId(
       userId,
@@ -141,7 +144,7 @@ export class SubscriptionController {
     if (!subscription) {
       throw new BadRequestException('Not subscribed');
     }
-    await this.stripeService.cancelSubscription(subscription.id);
+    await this.stripeService.stopSubscription(subscription.id);
   }
 
   @ApiOperation({
@@ -169,7 +172,90 @@ export class SubscriptionController {
       startedAt: subscriptionDetails.start_date,
       nextPaymentAt: subscriptionDetails.current_period_end,
       endAt: subscriptionDetails.cancel_at,
+      discount: {
+        code: subscriptionDetails.discount.coupon.name,
+        percent: subscriptionDetails.discount.coupon.percent_off,
+      },
     };
+  }
+
+  @ApiOperation({
+    description: 'Get subscription details for user',
+  })
+  @ApiNotFoundResponse()
+  @ApiOkResponse()
+  @HttpCode(200)
+  @Get('/details/:userId')
+  async getSubscriptionDetailsByUserId(
+    @Headers() headers,
+    @Param('userId') userId: string,
+  ): Promise<SubscriptionDto> {
+    const subscription = await this.subscriptionService.getSubscriptionByUserId(
+      userId,
+    );
+    if (!subscription) {
+      throw new NotFoundException('Not subscribed');
+    }
+    const subscriptionDetails = await this.stripeService.getSubscription(
+      subscription.id,
+    );
+    return {
+      status: subscriptionDetails.status,
+      price: subscriptionDetails.items.data[0].price.unit_amount / 100,
+      isCanceled: subscriptionDetails.cancel_at_period_end,
+      startedAt: subscriptionDetails.start_date,
+      nextPaymentAt: subscriptionDetails.current_period_end,
+      endAt: subscriptionDetails.cancel_at,
+      discount: {
+        code: subscriptionDetails.discount.coupon.name,
+        percent: subscriptionDetails.discount.coupon.percent_off,
+      },
+    };
+  }
+
+  @ApiOperation({
+    description: 'Create subscription',
+  })
+  @ApiBadRequestResponse()
+  @ApiOkResponse()
+  @HttpCode(200)
+  @Post('/create')
+  async createSubscription(
+    @Headers() headers,
+    @Body() create: CreateSubscriptionDto,
+  ) {
+    const customer = await this.customerService.getById(create.customerId);
+    if (!customer) {
+      throw new NotFoundException('Customer not found');
+    }
+    const subscriptionId = await this.stripeService.createSubscription(
+      create.customerId,
+      create.cancelAt,
+    );
+    return await this.subscriptionService.createSubscription(
+      subscriptionId,
+      customer,
+    );
+  }
+
+  @ApiOperation({
+    description: 'Cancel subscription immediately',
+  })
+  @ApiBadRequestResponse()
+  @ApiOkResponse()
+  @HttpCode(200)
+  @Delete('/cancel/:subscriptionId')
+  async cancelSubscription(
+    @Headers() headers,
+    @Param('subscriptionId') subscriptionId: string,
+  ) {
+    const subscription = await this.subscriptionService.getSubscriptionById(
+      subscriptionId,
+    );
+    if (!subscription) {
+      throw new BadRequestException("Subscription doesn't exist");
+    }
+    await this.stripeService.cancelSubscription(subscriptionId);
   }
 
   private async methodPayment(event) {
@@ -182,7 +268,7 @@ export class SubscriptionController {
     const customerId = event.data.object['customer'];
     const subscriptionId = event.data.object['subscription'];
     this.userService.userSubscribed(userId).subscribe();
-    const customer = await this.customerService.createCustomer(
+    const customer = await this.customerService.saveCustomer(
       userId,
       customerId,
     );

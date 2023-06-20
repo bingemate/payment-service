@@ -29,4 +29,10 @@ export default class SubscriptionService {
   async deleteSubscription(id: string) {
     await this.subscriptionRepository.delete({ id });
   }
+
+  async getSubscriptionById(subscriptionId: string) {
+    return await this.subscriptionRepository.findOneBy({
+      id: subscriptionId,
+    });
+  }
 }

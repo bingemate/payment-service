@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { DiscountDto } from './discount.dto';
 
 export class SubscriptionDto {
   @ApiProperty()
@@ -13,4 +14,6 @@ export class SubscriptionDto {
   nextPaymentAt: number;
   @ApiProperty()
   endAt: number;
+  @ApiProperty({ type: DiscountDto })
+  discount: DiscountDto;
 }
