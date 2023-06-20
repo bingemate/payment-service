@@ -232,10 +232,12 @@ export class SubscriptionController {
       create.customerId,
       create.cancelAt,
     );
-    return await this.subscriptionService.createSubscription(
-      subscriptionId,
-      customer,
-    );
+    return {
+      id: await this.subscriptionService.createSubscription(
+        subscriptionId,
+        customer,
+      ),
+    };
   }
 
   @ApiOperation({
