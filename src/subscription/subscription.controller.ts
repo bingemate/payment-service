@@ -172,6 +172,10 @@ export class SubscriptionController {
       startedAt: subscriptionDetails.start_date,
       nextPaymentAt: subscriptionDetails.current_period_end,
       endAt: subscriptionDetails.cancel_at,
+      discount: {
+        code: subscriptionDetails.discount.coupon.name,
+        percent: subscriptionDetails.discount.coupon.percent_off,
+      },
     };
   }
 
@@ -202,6 +206,10 @@ export class SubscriptionController {
       startedAt: subscriptionDetails.start_date,
       nextPaymentAt: subscriptionDetails.current_period_end,
       endAt: subscriptionDetails.cancel_at,
+      discount: {
+        code: subscriptionDetails.discount.coupon.name,
+        percent: subscriptionDetails.discount.coupon.percent_off,
+      },
     };
   }
 
