@@ -228,12 +228,12 @@ export class SubscriptionController {
     @Headers() headers,
     @Body() create: CreateSubscriptionDto,
   ) {
-    const customer = await this.customerService.getByUserId(create.customerId);
+    const customer = await this.customerService.getByUserId(create.userId);
     if (!customer) {
       throw new NotFoundException('Customer not found');
     }
     const subscriptionId = await this.stripeService.createSubscription(
-      create.customerId,
+      customer.customerId,
       create.cancelAt,
     );
     return {
@@ -253,15 +253,15 @@ export class SubscriptionController {
   @Delete('/cancel/:subscriptionId')
   async cancelSubscription(
     @Headers() headers,
-    @Param('subscriptionId') subscriptionId: string,
+    @Param('userId') userId: string,
   ) {
-    const subscription = await this.subscriptionService.getSubscriptionById(
-      subscriptionId,
+    const subscription = await this.subscriptionService.getSubscriptionByUserId(
+      userId,
     );
     if (!subscription) {
       throw new BadRequestException("Subscription doesn't exist");
     }
-    await this.stripeService.cancelSubscription(subscriptionId);
+    await this.stripeService.cancelSubscription(subscription.id);
   }
 
   private async methodPayment(event) {

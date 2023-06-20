@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateSubscriptionDto {
   @ApiProperty()
-  customerId: string;
+  userId: string;
   @ApiProperty({ required: false })
   cancelAt?: number;
 }
