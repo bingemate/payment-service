@@ -24,7 +24,7 @@ export class CustomerController {
   @ApiOkResponse()
   @HttpCode(200)
   @Post()
-  async createdCustomer(
+  async createCustomer(
     @Headers() headers,
     @Body() createCustomerDto: CreateCustomerDto,
   ) {

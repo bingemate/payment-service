@@ -15,5 +15,5 @@ export class SubscriptionDto {
   @ApiProperty()
   endAt: number;
   @ApiProperty({ type: DiscountDto })
-  discount: DiscountDto;
+  discount?: DiscountDto;
 }
