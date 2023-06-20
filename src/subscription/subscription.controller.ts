@@ -250,7 +250,7 @@ export class SubscriptionController {
   @ApiBadRequestResponse()
   @ApiOkResponse()
   @HttpCode(200)
-  @Delete('/cancel/:subscriptionId')
+  @Delete('/cancel/:userId')
   async cancelSubscription(
     @Headers() headers,
     @Param('userId') userId: string,
