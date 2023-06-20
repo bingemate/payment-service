@@ -1,11 +1,13 @@
 import {
   BadRequestException,
+  Body,
   Controller,
   Delete,
   Get,
   Headers,
   HttpCode,
   NotFoundException,
+  Param,
   Post,
   RawBodyRequest,
   Req,
@@ -22,6 +24,7 @@ import StripeService from '../stripe/stripe.service';
 import CustomerService from '../customer/customer.service';
 import UserService from '../user/user.service';
 import { SubscriptionDto } from './dto/subscription.dto';
+import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 
 @ApiTags('/subscription')
 @Controller({ path: '/subscription' })
@@ -172,6 +175,61 @@ export class SubscriptionController {
     };
   }
 
+  @ApiOperation({
+    description: 'Get subscription details for user',
+  })
+  @ApiNotFoundResponse()
+  @ApiOkResponse()
+  @HttpCode(200)
+  @Get('/details/:userId')
+  async getSubscriptionDetailsByUserId(
+    @Headers() headers,
+    @Param('userId') userId: string,
+  ): Promise<SubscriptionDto> {
+    const subscription = await this.subscriptionService.getSubscriptionByUserId(
+      userId,
+    );
+    if (!subscription) {
+      throw new NotFoundException('Not subscribed');
+    }
+    const subscriptionDetails = await this.stripeService.getSubscription(
+      subscription.id,
+    );
+    return {
+      status: subscriptionDetails.status,
+      price: subscriptionDetails.items.data[0].price.unit_amount / 100,
+      isCanceled: subscriptionDetails.cancel_at_period_end,
+      startedAt: subscriptionDetails.start_date,
+      nextPaymentAt: subscriptionDetails.current_period_end,
+      endAt: subscriptionDetails.cancel_at,
+    };
+  }
+
+  @ApiOperation({
+    description: 'Create subscription',
+  })
+  @ApiBadRequestResponse()
+  @ApiOkResponse()
+  @HttpCode(200)
+  @Post('/create')
+  async createSubscription(
+    @Headers() headers,
+    @Body() create: CreateSubscriptionDto,
+  ) {
+    const customer = await this.customerService.getById(create.customerId);
+    if (!customer) {
+      throw new NotFoundException('Customer not found');
+    }
+    const subscriptionId = await this.stripeService.createSubscription(
+      create.customerId,
+      create.cancelAt,
+    );
+    return await this.subscriptionService.createSubscription(
+      subscriptionId,
+      customer,
+    );
+  }
+
   private async methodPayment(event) {
     const intentId = event.data.object['setup_intent'];
     await this.stripeService.updatePaymentMethod(intentId);
@@ -182,7 +240,7 @@ export class SubscriptionController {
     const customerId = event.data.object['customer'];
     const subscriptionId = event.data.object['subscription'];
     this.userService.userSubscribed(userId).subscribe();
-    const customer = await this.customerService.createCustomer(
+    const customer = await this.customerService.saveCustomer(
       userId,
       customerId,
     );
