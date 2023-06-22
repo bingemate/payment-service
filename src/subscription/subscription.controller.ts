@@ -76,6 +76,9 @@ export class SubscriptionController {
       );
       const subscriptionId = event.data.object['id'];
       const customer = await this.customerService.getBySubId(subscriptionId);
+      if (!customer) {
+        return;
+      }
       this.userService.userUnsubscribed(customer.userId).subscribe();
       await this.subscriptionService.deleteSubscription(subscriptionId);
     } catch (err) {
